@@ -3811,12 +3811,2014 @@ unsub(); // Remove listener
 - [ ] CSS: Box model, flexbox, grid, specificity, animations, responsive
 - [ ] SCSS: Variables, mixins, nesting, @use, BEM
 - [ ] JS Basic: Data types, hoisting, closures, `this`, prototypes
-- [ ] JS Advanced: Promises, async/await, event loop, generators, proxy
+- [ ] JS ES6+: Arrow functions, destructuring, template literals, modules, classes, iterators
+- [ ] JS Advanced: Promises, async/await, event loop, generators, proxy, symbols
+- [ ] JS Patterns: Currying, composition, IIFE, design patterns, functional programming
 - [ ] React: Hooks, lifecycle, context, patterns, optimization
 - [ ] Performance: Core Web Vitals, code splitting, lazy loading
 - [ ] Debugging: DevTools, common React bugs, CSS issues
 - [ ] Coding: Implement common utilities from scratch
 - [ ] System Design: Folder structure, component architecture
+
+---
+
+*Good luck with your interviews! 🚀 Consistency > Cramming. Review 10 questions per day.*
+
+---
+
+# ═══════════════════════════════════════
+# COMPLETE JS / ES6+ DEEP DIVE
+# ═══════════════════════════════════════
+> *All missing topics: ES6 features, OOP, Functional Programming, Design Patterns, DOM, Error Handling, Modules, Iterators, and more*
+
+---
+
+## 🔶 ES6 FEATURES — Complete Reference
+
+### Q134. What are Arrow Functions? How are they different from regular functions?
+
+**Answer:**
+Arrow functions are a concise syntax for writing functions introduced in ES6.
+
+```js
+// Regular function
+function add(a, b) { return a + b; }
+
+// Arrow function
+const add = (a, b) => a + b;           // Implicit return
+const square = x => x * x;             // Single param — no parens needed
+const greet = () => 'Hello!';          // No params
+const getObj = () => ({ id: 1 });      // Return object — wrap in ()
+
+// Multi-line
+const process = (x) => {
+  const result = x * 2;
+  return result + 1;
+};
+```
+
+**Key differences:**
+
+| | Regular Function | Arrow Function |
+|--|-----------------|----------------|
+| `this` binding | Dynamic (depends on caller) | Lexical (inherits from enclosing scope) |
+| `arguments` object | Yes | No (use rest params) |
+| `new` keyword | Can be constructor | ❌ Cannot be constructor |
+| `prototype` | Has it | No prototype property |
+| Named | Can be named/anonymous | Always anonymous |
+
+```js
+// this difference — most important!
+const timer = {
+  id: 42,
+  startRegular() {
+    setTimeout(function() {
+      console.log(this.id); // undefined — 'this' is window/undefined
+    }, 100);
+  },
+  startArrow() {
+    setTimeout(() => {
+      console.log(this.id); // 42 — 'this' inherited from startArrow
+    }, 100);
+  }
+};
+```
+
+---
+
+### Q135. What is Destructuring? Show all forms.
+
+**Answer:**
+Destructuring extracts values from arrays or properties from objects into distinct variables.
+
+```js
+// ─── ARRAY DESTRUCTURING ───
+const [a, b, c] = [1, 2, 3];
+// a=1, b=2, c=3
+
+// Skip elements
+const [first, , third] = [1, 2, 3];
+// first=1, third=3
+
+// Default values
+const [x = 10, y = 20] = [5];
+// x=5, y=20
+
+// Swap variables
+let m = 1, n = 2;
+[m, n] = [n, m];
+// m=2, n=1
+
+// Rest in array
+const [head, ...tail] = [1, 2, 3, 4];
+// head=1, tail=[2,3,4]
+
+// ─── OBJECT DESTRUCTURING ───
+const user = { name: 'Alice', age: 30, city: 'Mumbai' };
+
+const { name, age } = user;
+
+// Rename while destructuring
+const { name: userName, age: userAge } = user;
+// userName='Alice', userAge=30
+
+// Default values
+const { name, role = 'user' } = user;
+// role='user' (not in object)
+
+// Nested destructuring
+const { address: { street, zip } } = { address: { street: 'MG Road', zip: '400001' } };
+
+// Rest in object
+const { name: n, ...rest } = user;
+// n='Alice', rest={ age: 30, city: 'Mumbai' }
+
+// ─── IN FUNCTION PARAMETERS ───
+function display({ name, age = 18, role = 'guest' }) {
+  console.log(`${name}, ${age}, ${role}`);
+}
+display({ name: 'Bob', age: 25 });
+
+// ─── FUNCTION RETURN ───
+function getCoords() { return { x: 10, y: 20 }; }
+const { x, y } = getCoords();
+```
+
+---
+
+### Q136. What are Template Literals? What are Tagged Templates?
+
+**Answer:**
+
+**Template Literals** — String literals allowing embedded expressions and multi-line strings.
+
+```js
+const name = 'Alice';
+const age = 30;
+
+// Expression interpolation
+const msg = `Hello, ${name}! You are ${age} years old.`;
+
+// Multi-line strings (no \n needed)
+const html = `
+  <div class="card">
+    <h2>${name}</h2>
+    <p>Age: ${age}</p>
+  </div>
+`;
+
+// Expressions inside ${}
+const price = 100;
+const tax = 0.18;
+console.log(`Total: ₹${(price * (1 + tax)).toFixed(2)}`);
+
+// Nested template literals
+const items = ['JS', 'React', 'CSS'];
+const list = `Skills: ${items.map(s => `<li>${s}</li>`).join('')}`;
+```
+
+**Tagged Templates** — A function that processes a template literal.
+
+```js
+function highlight(strings, ...values) {
+  return strings.reduce((result, str, i) => {
+    return result + str + (values[i] !== undefined
+      ? `<mark>${values[i]}</mark>`
+      : '');
+  }, '');
+}
+
+const skill = 'JavaScript';
+const years = 3;
+const output = highlight`I know ${skill} for ${years} years.`;
+// "I know <mark>JavaScript</mark> for <mark>3</mark> years."
+```
+
+Real-world tagged templates: `styled-components`, `gql` (GraphQL queries), `sql`.
+
+---
+
+### Q137. What are Default Parameters in functions?
+
+**Answer:**
+```js
+// ES5 way — verbose
+function greet(name) {
+  name = name || 'Guest';
+  return `Hello, ${name}!`;
+}
+
+// ES6 default parameters
+function greet(name = 'Guest', greeting = 'Hello') {
+  return `${greeting}, ${name}!`;
+}
+greet();               // "Hello, Guest!"
+greet('Alice');        // "Hello, Alice!"
+greet('Bob', 'Hi');   // "Hi, Bob!"
+
+// Default can be an expression or function call
+function createId(prefix = 'ID', num = Math.random()) {
+  return `${prefix}-${num}`;
+}
+
+// Defaults can reference earlier params
+function createRange(start, end = start + 10) {
+  return [start, end];
+}
+createRange(5); // [5, 15]
+
+// undefined triggers default; null does NOT
+greet(undefined); // "Hello, Guest!" — default used
+greet(null);      // "Hello, null!" — null is a value, no default
+```
+
+---
+
+### Q138. What are ES6 Modules (`import` / `export`)? Types of exports?
+
+**Answer:**
+
+```js
+// ─── NAMED EXPORTS ───
+// math.js
+export const PI = 3.14159;
+export function add(a, b) { return a + b; }
+export function multiply(a, b) { return a * b; }
+
+// Import named
+import { add, multiply } from './math.js';
+import { add as sum } from './math.js';        // Alias
+import * as MathUtils from './math.js';         // Namespace import
+
+// ─── DEFAULT EXPORT ───
+// One per file
+export default function App() { return <div>App</div>; }
+
+// Import default (any name)
+import App from './App.js';
+import MyApp from './App.js';  // Can rename freely
+
+// ─── MIXED ───
+export default class EventEmitter { }
+export const VERSION = '1.0.0';
+
+import EventEmitter, { VERSION } from './EventEmitter.js';
+
+// ─── RE-EXPORTS ───
+// index.js — barrel file
+export { Button } from './Button.js';
+export { default as Modal } from './Modal.js';
+export * from './utils.js';
+
+// ─── DYNAMIC IMPORTS ───
+const module = await import('./heavyModule.js');
+// Returns a promise — useful for code splitting
+```
+
+**ES Modules vs CommonJS:**
+
+| | ES Modules | CommonJS |
+|--|-----------|---------|
+| Syntax | `import/export` | `require/module.exports` |
+| Loading | Static (compile-time) | Dynamic (runtime) |
+| Tree-shakeable | Yes | No |
+| Browser native | Yes | No (needs bundler) |
+| Top-level await | Yes | No |
+
+---
+
+### Q139. What are ES6 Classes? How do they relate to prototypes?
+
+**Answer:**
+ES6 classes are **syntactic sugar** over prototype-based inheritance. They don't introduce a new OOP model.
+
+```js
+class Animal {
+  // Class field (ES2022 — public)
+  species = 'Unknown';
+  
+  // Private field (ES2022)
+  #health = 100;
+
+  constructor(name, sound) {
+    this.name = name;
+    this.sound = sound;
+  }
+
+  // Instance method
+  speak() {
+    return `${this.name} says ${this.sound}`;
+  }
+
+  // Getter
+  get info() {
+    return `${this.name} (${this.species})`;
+  }
+
+  // Setter
+  set nickname(val) {
+    this.name = val.trim();
+  }
+
+  // Static method — called on class, not instance
+  static create(name, sound) {
+    return new Animal(name, sound);
+  }
+
+  // Private method
+  #heal(amount) {
+    this.#health = Math.min(100, this.#health + amount);
+  }
+}
+
+class Dog extends Animal {
+  constructor(name) {
+    super(name, 'Woof');    // Must call super() first
+    this.tricks = [];
+  }
+
+  learn(trick) {
+    this.tricks.push(trick);
+  }
+
+  // Override parent method
+  speak() {
+    return `${super.speak()} and knows ${this.tricks.length} tricks`;
+  }
+}
+
+const dog = new Dog('Rex');
+dog.speak();      // "Rex says Woof and knows 0 tricks"
+dog.learn('sit');
+dog.speak();      // "Rex says Woof and knows 1 tricks"
+
+// Under the hood — still prototypes!
+Dog.prototype.__proto__ === Animal.prototype; // true
+```
+
+---
+
+### Q140. What is the `for...of` loop? How is it different from `for...in`?
+
+**Answer:**
+
+```js
+// for...of — iterates over VALUES of iterables (arrays, strings, maps, sets, generators)
+const arr = [10, 20, 30];
+for (const val of arr) {
+  console.log(val); // 10, 20, 30
+}
+
+// Works on strings
+for (const char of 'hello') {
+  console.log(char); // h, e, l, l, o
+}
+
+// With Map
+const map = new Map([['a', 1], ['b', 2]]);
+for (const [key, val] of map) {
+  console.log(key, val); // a 1, b 2
+}
+
+// for...in — iterates over KEYS (enumerable properties) of an object
+const obj = { x: 1, y: 2, z: 3 };
+for (const key in obj) {
+  console.log(key); // x, y, z
+}
+
+// ⚠️ Pitfall: for...in also iterates inherited prototype properties
+// Always use hasOwnProperty check or Object.keys() instead
+for (const key in obj) {
+  if (obj.hasOwnProperty(key)) { ... }
+}
+```
+
+| | `for...of` | `for...in` |
+|--|-----------|-----------|
+| Iterates | Values | Keys/property names |
+| Works on | Iterables (array, string, map, set) | Objects |
+| Prototype chain | No | Yes (includes inherited) |
+
+---
+
+### Q141. What are Iterators and Iterables? How do they work?
+
+**Answer:**
+An **Iterable** is an object with a `[Symbol.iterator]()` method.
+An **Iterator** is an object with a `next()` method returning `{ value, done }`.
+
+```js
+// Custom Iterable
+const range = {
+  from: 1,
+  to: 5,
+  [Symbol.iterator]() {
+    let current = this.from;
+    const last = this.to;
+    return {
+      next() {
+        return current <= last
+          ? { value: current++, done: false }
+          : { value: undefined, done: true };
+      }
+    };
+  }
+};
+
+for (const num of range) console.log(num); // 1 2 3 4 5
+const arr = [...range]; // [1, 2, 3, 4, 5]
+
+// Generator as iterator (cleaner)
+function* rangeGen(from, to) {
+  for (let i = from; i <= to; i++) yield i;
+}
+for (const n of rangeGen(1, 5)) console.log(n);
+```
+
+Built-in iterables: `Array`, `String`, `Map`, `Set`, `arguments`, DOM NodeList.
+
+---
+
+### Q142. What is `Symbol.iterator`, `Symbol.toPrimitive`, and other well-known Symbols?
+
+**Answer:**
+Symbols are used as unique keys that enable hooking into JS language internals.
+
+```js
+// Symbol.iterator — make an object iterable
+class InfiniteCounter {
+  [Symbol.iterator]() {
+    let n = 0;
+    return { next: () => ({ value: n++, done: false }) };
+  }
+}
+
+// Symbol.toPrimitive — control type conversion
+class Money {
+  constructor(amount, currency) {
+    this.amount = amount;
+    this.currency = currency;
+  }
+  [Symbol.toPrimitive](hint) {
+    if (hint === 'number') return this.amount;
+    if (hint === 'string') return `${this.amount} ${this.currency}`;
+    return this.amount; // default
+  }
+}
+const price = new Money(100, 'USD');
++price;        // 100 (number hint)
+`${price}`;   // "100 USD" (string hint)
+
+// Symbol.hasInstance — customize instanceof
+class EvenNumber {
+  static [Symbol.hasInstance](num) {
+    return num % 2 === 0;
+  }
+}
+2 instanceof EvenNumber; // true
+3 instanceof EvenNumber; // false
+
+// Symbol.toStringTag — customize Object.prototype.toString
+class Queue {
+  get [Symbol.toStringTag]() { return 'Queue'; }
+}
+Object.prototype.toString.call(new Queue()); // "[object Queue]"
+```
+
+---
+
+### Q143. What is the Nullish Coalescing operator (`??`) and Logical Assignment operators?
+
+**Answer:**
+
+```js
+// ?? — returns right side only if left is null or undefined (NOT falsy)
+const name = null ?? 'Guest';       // 'Guest'
+const count = 0 ?? 10;              // 0 ← (0 is not null/undefined)
+const text = '' ?? 'default';       // '' ← (empty string is not null/undefined)
+
+// vs || (OR) — returns right side for ANY falsy value
+const count2 = 0 || 10;             // 10 ← treats 0 as falsy
+const text2 = '' || 'default';      // 'default' ← treats '' as falsy
+
+// ??= (Nullish Assignment) — assign only if null/undefined
+let user = null;
+user ??= 'Guest';   // user = 'Guest'
+
+let score = 0;
+score ??= 100;      // score stays 0 (not null/undefined)
+
+// ||= (Logical OR Assignment) — assign if falsy
+let a = 0;
+a ||= 42;           // a = 42 (0 is falsy)
+
+// &&= (Logical AND Assignment) — assign if truthy
+let b = 5;
+b &&= b * 2;        // b = 10 (5 is truthy, so assign)
+
+let c = 0;
+c &&= c * 2;        // c stays 0 (0 is falsy, short-circuit)
+```
+
+---
+
+### Q144. What is Optional Chaining (`?.`) in depth?
+
+**Answer:**
+```js
+const user = {
+  name: 'Alice',
+  address: {
+    street: '123 MG Road'
+    // no city property
+  },
+  getFullName: () => 'Alice Smith'
+};
+
+// Without optional chaining — verbose and error-prone
+const city = user && user.address && user.address.city;
+
+// With optional chaining
+const city = user?.address?.city;           // undefined (no error)
+const zip  = user?.address?.zipCode;        // undefined
+
+// Method calls
+const fullName = user?.getFullName?.();     // 'Alice Smith'
+const missing  = user?.nonExistentMethod?.(); // undefined
+
+// Array indexing
+const users = [{ name: 'Alice' }];
+const secondUser = users?.[1]?.name;        // undefined (safe)
+
+// Combined with nullish coalescing
+const displayCity = user?.address?.city ?? 'City not set';
+// 'City not set'
+
+// Practical: optional chaining with dynamic keys
+const key = 'name';
+user?.[key];  // 'Alice'
+```
+
+---
+
+### Q145. What are Getters and Setters in JavaScript objects?
+
+**Answer:**
+```js
+// Object literal
+const circle = {
+  _radius: 5,
+  get radius() { return this._radius; },
+  set radius(val) {
+    if (val < 0) throw new RangeError('Radius must be positive');
+    this._radius = val;
+  },
+  get area() {
+    return Math.PI * this._radius ** 2; // Computed property, no setter
+  }
+};
+
+circle.radius;       // 5 — getter called
+circle.radius = 10;  // setter called
+circle.area;         // 314.159... — computed on access
+
+// Class-based getters/setters
+class Temperature {
+  #celsius;
+  
+  constructor(celsius) { this.#celsius = celsius; }
+  
+  get fahrenheit() { return this.#celsius * 9/5 + 32; }
+  set fahrenheit(f) { this.#celsius = (f - 32) * 5/9; }
+  
+  get celsius() { return this.#celsius; }
+  set celsius(c) { this.#celsius = c; }
+}
+
+const temp = new Temperature(100);
+temp.fahrenheit; // 212
+temp.fahrenheit = 32;
+temp.celsius;    // 0
+```
+
+---
+
+### Q146. What is `Object.freeze()` vs `Object.seal()` vs `const`?
+
+**Answer:**
+
+```js
+// const — prevents reassignment of the variable, NOT mutation of the value
+const obj = { a: 1 };
+obj.a = 2;   // ✅ allowed — mutating the object
+obj = {};    // ❌ TypeError — reassignment blocked
+
+// Object.freeze() — prevents ALL modifications (add, delete, modify)
+const frozen = Object.freeze({ a: 1, b: 2 });
+frozen.a = 99;     // Silent fail (or TypeError in strict mode)
+frozen.c = 3;      // Silent fail
+delete frozen.a;   // Silent fail
+console.log(frozen); // { a: 1, b: 2 } — unchanged
+
+// ⚠️ Shallow freeze — nested objects are NOT frozen
+const obj2 = Object.freeze({ nested: { x: 1 } });
+obj2.nested.x = 99; // ✅ Works! nested is not frozen
+
+// Object.seal() — prevents add/delete, but allows MODIFYING existing properties
+const sealed = Object.seal({ a: 1, b: 2 });
+sealed.a = 99;     // ✅ allowed — modifying existing
+sealed.c = 3;      // ❌ silent fail — can't add
+delete sealed.a;   // ❌ silent fail — can't delete
+
+// Check
+Object.isFrozen(frozen); // true
+Object.isSealed(sealed); // true
+Object.isExtensible(obj); // true (can add properties)
+```
+
+---
+
+### Q147. What is `Object.create()` and how does it differ from `new`?
+
+**Answer:**
+```js
+// Object.create(proto) — creates a new object with proto as its prototype
+const personProto = {
+  greet() { return `Hi, I'm ${this.name}`; }
+};
+
+const alice = Object.create(personProto);
+alice.name = 'Alice';
+alice.greet(); // "Hi, I'm Alice"
+
+// Object.create(null) — creates object with NO prototype chain
+const pureMap = Object.create(null);
+pureMap.key = 'value';
+// No toString, hasOwnProperty, etc. — useful as a pure hash map
+
+// vs 'new' keyword
+function Person(name) { this.name = name; }
+Person.prototype.greet = function() { return `Hi, I'm ${this.name}`; };
+
+const bob = new Person('Bob');
+// new: creates object, sets __proto__ to Person.prototype, calls constructor
+
+// Under the hood, new does:
+function simulateNew(Constructor, ...args) {
+  const obj = Object.create(Constructor.prototype);
+  const result = Constructor.apply(obj, args);
+  return result instanceof Object ? result : obj;
+}
+```
+
+---
+
+## 🔶 FUNCTIONAL PROGRAMMING IN JS
+
+### Q148. What is a Pure Function? What are Side Effects?
+
+**Answer:**
+A **pure function**:
+1. Same inputs → always same output (deterministic)
+2. No side effects
+
+```js
+// ✅ Pure function
+function add(a, b) { return a + b; }
+function formatName(first, last) { return `${first} ${last}`; }
+
+// ❌ Impure — reads external state
+let tax = 0.18;
+function getPrice(amount) { return amount * (1 + tax); } // Depends on external 'tax'
+
+// ❌ Impure — mutates input
+function addItem(cart, item) {
+  cart.push(item);  // Mutates the array!
+  return cart;
+}
+
+// ✅ Pure version — returns new array
+function addItem(cart, item) {
+  return [...cart, item]; // Creates new array
+}
+```
+
+**Side Effects** — Things a function does beyond returning a value:
+- Modifying external state
+- DOM manipulation
+- API calls (I/O)
+- Console.log
+- Modifying its arguments
+
+---
+
+### Q149. What is Currying? Show a practical example.
+
+**Answer:**
+Currying transforms a function with multiple arguments into a sequence of functions, each taking a single argument.
+
+```js
+// Normal function
+function multiply(a, b) { return a * b; }
+
+// Curried version
+function curriedMultiply(a) {
+  return function(b) {
+    return a * b;
+  };
+}
+
+// ES6 arrow style
+const curry = a => b => a * b;
+
+const double = curry(2);
+const triple = curry(3);
+
+double(5); // 10
+triple(5); // 15
+
+// Generic curry utility
+function curryN(fn) {
+  return function curried(...args) {
+    if (args.length >= fn.length) {
+      return fn.apply(this, args);
+    }
+    return function(...moreArgs) {
+      return curried.apply(this, args.concat(moreArgs));
+    };
+  };
+}
+
+// Practical use case — reusable event handlers
+const handleEvent = (type) => (handler) => (event) => {
+  if (event.type === type) handler(event);
+};
+
+const onSubmit = handleEvent('submit');
+const logSubmit = onSubmit((e) => console.log('Form submitted', e));
+```
+
+---
+
+### Q150. What is function composition? What is `pipe` vs `compose`?
+
+**Answer:**
+Function composition combines multiple functions so the output of one is the input of the next.
+
+```js
+// compose — right to left (mathematical convention: f ∘ g = f(g(x)))
+const compose = (...fns) => x => fns.reduceRight((v, f) => f(v), x);
+
+// pipe — left to right (more readable for most developers)
+const pipe = (...fns) => x => fns.reduce((v, f) => f(v), x);
+
+// Example
+const trim      = str => str.trim();
+const lowercase = str => str.toLowerCase();
+const addDash   = str => str.replace(/\s+/g, '-');
+const truncate  = str => str.slice(0, 20);
+
+// pipe reads left-to-right — trim first, then lowercase, then dash, then truncate
+const slugify = pipe(trim, lowercase, addDash, truncate);
+slugify('  Hello World From React  '); // "hello-world-from-re"
+
+// Async pipe
+const asyncPipe = (...fns) => x => fns.reduce(async (v, f) => f(await v), x);
+
+const processUser = asyncPipe(
+  validateUser,
+  hashPassword,
+  saveToDatabase,
+  sendWelcomeEmail
+);
+```
+
+---
+
+### Q151. What are IIFEs? When are they used?
+
+**Answer:**
+An IIFE (Immediately Invoked Function Expression) runs as soon as it's defined.
+
+```js
+// Classic IIFE syntax
+(function() {
+  const privateVar = 'I am private';
+  console.log('Runs immediately!');
+})();
+
+// Arrow function IIFE
+(() => {
+  console.log('Arrow IIFE');
+})();
+
+// IIFE with parameters
+(function(global, factory) {
+  factory(global);
+})(window, function(win) {
+  win.myLib = { version: '1.0' };
+});
+
+// Async IIFE — common in module setup
+(async () => {
+  const data = await fetchInitialData();
+  initApp(data);
+})();
+```
+
+**Use cases:**
+- Avoid polluting global scope (before ES modules)
+- Create private scope/variables
+- Initialize async operations at module level
+- Library wrappers (jQuery, lodash pattern)
+
+---
+
+### Q152. What is Memoization? How does it differ from Caching?
+
+**Answer:**
+
+```js
+// Memoization — caching function results based on inputs
+function memoize(fn) {
+  const cache = new Map();
+  return function(...args) {
+    const key = JSON.stringify(args);
+    if (cache.has(key)) return cache.get(key);
+    const result = fn.apply(this, args);
+    cache.set(key, result);
+    return result;
+  };
+}
+
+// Example: Fibonacci with memoization
+const fib = memoize(function(n) {
+  if (n <= 1) return n;
+  return fib(n - 1) + fib(n - 2); // Uses memoized version!
+});
+
+fib(40); // Computed in milliseconds vs seconds without memoization
+
+// Memoization with WeakMap for object arguments (avoids memory leaks)
+function memoizeWeak(fn) {
+  const cache = new WeakMap();
+  return function(obj) {
+    if (cache.has(obj)) return cache.get(obj);
+    const result = fn(obj);
+    cache.set(obj, result);
+    return result;
+  };
+}
+```
+
+**Memoization vs Caching:**
+- Memoization: Specific to pure functions, keys are function arguments
+- Caching: General term, can be for any data (HTTP responses, DB queries, etc.)
+
+---
+
+### Q153. What is Immutability in JavaScript? Why does it matter?
+
+**Answer:**
+Immutability means not modifying data after creation — instead, creating new copies.
+
+```js
+// ❌ Mutable approach — mutates original
+function addSkill(user, skill) {
+  user.skills.push(skill);     // Mutates!
+  return user;
+}
+
+// ✅ Immutable approach — creates new objects
+function addSkill(user, skill) {
+  return {
+    ...user,
+    skills: [...user.skills, skill]  // New array
+  };
+}
+
+// Immutable array operations
+const arr = [1, 2, 3, 4, 5];
+
+// Add
+const withNew = [...arr, 6];              // [1,2,3,4,5,6]
+
+// Remove by index
+const without3 = arr.filter((_, i) => i !== 2); // [1,2,4,5]
+
+// Update by index
+const updated = arr.map((v, i) => i === 2 ? 99 : v); // [1,2,99,4,5]
+
+// Immutable object updates
+const user = { name: 'Alice', address: { city: 'Mumbai' } };
+
+// Shallow update
+const renamed = { ...user, name: 'Bob' };
+
+// Deep update (nested)
+const movedCity = {
+  ...user,
+  address: { ...user.address, city: 'Delhi' }
+};
+```
+
+**Why it matters:**
+- Predictable state (no surprise mutations)
+- Easy change detection (reference equality check)
+- Required for React state updates, Redux
+- Enables undo/redo patterns
+
+---
+
+## 🔶 ERROR HANDLING
+
+### Q154. How does Error Handling work in JavaScript? Types of Errors?
+
+**Answer:**
+
+```js
+// Built-in Error types
+new Error('generic error');
+new TypeError('wrong type');          // null.property, wrong argument type
+new ReferenceError('not defined');    // accessing undeclared variable
+new SyntaxError('invalid syntax');    // parse time error
+new RangeError('out of range');       // array length -1, toFixed(200)
+new URIError('bad URI');
+new EvalError('eval error');
+
+// try / catch / finally
+function riskyOperation(input) {
+  try {
+    if (typeof input !== 'number') {
+      throw new TypeError(`Expected number, got ${typeof input}`);
+    }
+    return JSON.parse(input);
+  } catch (error) {
+    if (error instanceof TypeError) {
+      console.error('Type problem:', error.message);
+    } else if (error instanceof SyntaxError) {
+      console.error('Parse problem:', error.message);
+    } else {
+      throw error; // Re-throw unknown errors
+    }
+  } finally {
+    console.log('Always runs — cleanup here');
+  }
+}
+
+// Custom Error class
+class ValidationError extends Error {
+  constructor(message, field) {
+    super(message);
+    this.name = 'ValidationError';
+    this.field = field;
+  }
+}
+
+throw new ValidationError('Email is invalid', 'email');
+
+// Async error handling
+async function fetchUser(id) {
+  try {
+    const res = await fetch(`/api/users/${id}`);
+    if (!res.ok) throw new Error(`HTTP ${res.status}: ${res.statusText}`);
+    return await res.json();
+  } catch (err) {
+    console.error('Fetch failed:', err.message);
+    throw err; // Re-throw so caller can handle
+  }
+}
+```
+
+---
+
+### Q155. What is error bubbling in async code? How to handle it properly?
+
+**Answer:**
+```js
+// ❌ Unhandled promise rejection — crash in Node, silent in browser
+fetch('/api/data').then(r => r.json()); // No .catch!
+
+// ✅ Global handler as safety net
+window.addEventListener('unhandledrejection', (event) => {
+  console.error('Unhandled:', event.reason);
+  event.preventDefault();
+});
+
+// ✅ Async error boundary pattern
+async function withErrorHandling(fn, fallback) {
+  try {
+    return await fn();
+  } catch (err) {
+    console.error(err);
+    return fallback;
+  }
+}
+
+const data = await withErrorHandling(() => fetchData(), []);
+
+// ✅ Result pattern (like Rust's Result type)
+async function safeAsync(promise) {
+  try {
+    const data = await promise;
+    return [null, data];
+  } catch (err) {
+    return [err, null];
+  }
+}
+
+const [error, users] = await safeAsync(fetchUsers());
+if (error) { /* handle */ return; }
+// use users safely
+```
+
+---
+
+## 🔶 THE DOM & BROWSER APIs
+
+### Q156. What is the DOM? Explain common DOM manipulation methods.
+
+**Answer:**
+The DOM (Document Object Model) is a tree-like representation of the HTML document that JS can interact with.
+
+```js
+// ─── SELECTING ELEMENTS ───
+document.getElementById('myId');
+document.querySelector('.class');           // First match
+document.querySelectorAll('div.card');      // All matches (NodeList)
+document.getElementsByClassName('card');    // Live HTMLCollection
+document.getElementsByTagName('p');
+
+// ─── CREATING & INSERTING ───
+const div = document.createElement('div');
+div.className = 'card';
+div.textContent = 'Hello';
+div.setAttribute('data-id', '42');
+
+// Modern insertion methods
+parent.append(div);          // Insert as last child (accepts strings too)
+parent.prepend(div);         // Insert as first child
+element.before(div);         // Insert before element
+element.after(div);          // Insert after element
+element.replaceWith(div);    // Replace element
+
+// ─── READING & MODIFYING ───
+element.textContent = 'New text';    // Text only (XSS-safe)
+element.innerHTML = '<b>Bold</b>';   // Parses HTML (⚠️ XSS risk)
+element.getAttribute('href');
+element.setAttribute('disabled', '');
+element.removeAttribute('disabled');
+element.classList.add('active');
+element.classList.remove('hidden');
+element.classList.toggle('open');
+element.classList.contains('active'); // boolean
+
+// ─── REMOVING ───
+element.remove();
+parent.removeChild(child);
+
+// ─── TRAVERSAL ───
+element.parentElement;
+element.children;           // Direct children (elements only)
+element.childNodes;         // All nodes including text nodes
+element.firstElementChild;
+element.lastElementChild;
+element.nextElementSibling;
+element.previousElementSibling;
+```
+
+---
+
+### Q157. What is Event Bubbling, Capturing, and `stopPropagation`?
+
+**Answer:**
+When an event fires on an element, it propagates through the DOM in two phases:
+
+```
+Capturing phase: window → document → html → body → div → button
+Target phase:    button (event fires here)
+Bubbling phase:  button → div → body → html → document → window
+```
+
+```js
+// Default: addEventListener listens in BUBBLE phase
+element.addEventListener('click', handler);           // Bubble phase
+element.addEventListener('click', handler, false);    // Bubble phase (explicit)
+element.addEventListener('click', handler, true);     // Capture phase
+
+// Stop bubbling — event won't travel up to parent handlers
+button.addEventListener('click', (e) => {
+  e.stopPropagation();    // Stop this event from bubbling
+  handleClick(e);
+});
+
+// Stop ALL handlers on this element AND stop bubbling
+button.addEventListener('click', (e) => {
+  e.stopImmediatePropagation();
+});
+
+// Prevent default browser behavior (form submit, link navigation, etc.)
+form.addEventListener('submit', (e) => {
+  e.preventDefault();  // Stops form from refreshing page
+  validateAndSubmit();
+});
+
+link.addEventListener('click', (e) => {
+  e.preventDefault();  // Stop navigation
+  handleRouting(e);
+});
+
+// Check where event originated
+parent.addEventListener('click', (e) => {
+  console.log(e.target);    // Element that was CLICKED (origin)
+  console.log(e.currentTarget); // Element this handler is attached to
+});
+```
+
+---
+
+### Q158. What is `requestAnimationFrame`? When to use it over `setTimeout`?
+
+**Answer:**
+`requestAnimationFrame` (rAF) schedules a callback before the browser's next repaint (~60fps).
+
+```js
+// ❌ setTimeout for animation — inconsistent, may cause jank
+function badAnimate() {
+  element.style.left = (parseFloat(element.style.left) + 1) + 'px';
+  setTimeout(badAnimate, 16); // Not synced to display refresh rate
+}
+
+// ✅ requestAnimationFrame — smooth, synced to display
+function animate(timestamp) {
+  const progress = timestamp - startTime;
+  const position = Math.min(progress / duration, 1) * 300; // 0 to 300px
+  
+  element.style.transform = `translateX(${position}px)`;
+  
+  if (progress < duration) {
+    requestAnimationFrame(animate); // Schedule next frame
+  }
+}
+
+let startTime;
+requestAnimationFrame((ts) => { startTime = ts; animate(ts); });
+
+// Cancel animation
+const frameId = requestAnimationFrame(animate);
+cancelAnimationFrame(frameId);
+
+// rAF also pauses when tab is not visible — saves battery/CPU
+```
+
+---
+
+### Q159. What is the MutationObserver API?
+
+**Answer:**
+`MutationObserver` watches for changes to the DOM tree.
+
+```js
+const observer = new MutationObserver((mutations) => {
+  mutations.forEach(mutation => {
+    if (mutation.type === 'childList') {
+      console.log('Child nodes changed:', mutation.addedNodes, mutation.removedNodes);
+    }
+    if (mutation.type === 'attributes') {
+      console.log(`Attribute "${mutation.attributeName}" changed`);
+    }
+    if (mutation.type === 'characterData') {
+      console.log('Text content changed');
+    }
+  });
+});
+
+// Start observing
+observer.observe(targetElement, {
+  childList: true,      // Watch for added/removed children
+  attributes: true,     // Watch for attribute changes
+  characterData: true,  // Watch for text changes
+  subtree: true,        // Watch all descendants (not just direct children)
+  attributeOldValue: true, // Record old attribute value
+});
+
+// Stop observing
+observer.disconnect();
+
+// Use cases: 
+// - Detect when a third-party widget inserts elements
+// - Watch for class changes on body (theme switches)
+// - Auto-resize textareas
+// - Implementing custom virtual scroll
+```
+
+---
+
+### Q160. What is the IntersectionObserver API? What are its use cases?
+
+**Answer:**
+`IntersectionObserver` watches when elements enter or leave the viewport (or a parent element).
+
+```js
+const observer = new IntersectionObserver((entries) => {
+  entries.forEach(entry => {
+    if (entry.isIntersecting) {
+      // Element is visible in viewport
+      entry.target.classList.add('visible');
+      observer.unobserve(entry.target); // Stop watching once visible
+    }
+  });
+}, {
+  root: null,           // null = viewport
+  rootMargin: '0px',    // Expand/shrink the intersection area
+  threshold: 0.5        // Fire when 50% of element is visible
+});
+
+// Observe all elements with .animate class
+document.querySelectorAll('.animate').forEach(el => observer.observe(el));
+
+// ─── USE CASES ───
+
+// 1. Lazy load images
+const imgObserver = new IntersectionObserver(entries => {
+  entries.forEach(({ isIntersecting, target }) => {
+    if (isIntersecting) {
+      target.src = target.dataset.src;
+      imgObserver.unobserve(target);
+    }
+  });
+});
+
+// 2. Infinite scroll (trigger load when sentinel is visible)
+const sentinel = document.querySelector('#sentinel');
+observer.observe(sentinel);
+
+// 3. Analytics — track what content was actually seen
+// 4. Sticky header shadow — add shadow when scrolled
+// 5. Progress indicators for reading
+```
+
+---
+
+## 🔶 ADVANCED JS PATTERNS
+
+### Q161. What are Design Patterns? Explain the most common ones.
+
+**Answer:**
+
+**Singleton Pattern** — Ensure only one instance of a class exists.
+```js
+class Database {
+  static #instance = null;
+  
+  constructor(url) {
+    if (Database.#instance) return Database.#instance;
+    this.connection = connect(url);
+    Database.#instance = this;
+  }
+  
+  static getInstance(url) {
+    if (!Database.#instance) new Database(url);
+    return Database.#instance;
+  }
+}
+
+const db1 = new Database('mongodb://...');
+const db2 = new Database('other://...');
+db1 === db2; // true — same instance
+```
+
+**Observer Pattern** — Pub/Sub, notify subscribers of changes.
+```js
+class EventBus {
+  #listeners = {};
+  
+  on(event, cb) {
+    (this.#listeners[event] ??= []).push(cb);
+    return () => this.off(event, cb);
+  }
+  off(event, cb) {
+    this.#listeners[event] = this.#listeners[event]?.filter(l => l !== cb);
+  }
+  emit(event, data) {
+    this.#listeners[event]?.forEach(cb => cb(data));
+  }
+}
+```
+
+**Factory Pattern** — Create objects without specifying exact class.
+```js
+function createUser(type) {
+  const base = { createdAt: Date.now() };
+  const roles = {
+    admin:  { ...base, canDelete: true,  canEdit: true  },
+    editor: { ...base, canDelete: false, canEdit: true  },
+    viewer: { ...base, canDelete: false, canEdit: false }
+  };
+  return roles[type] ?? roles.viewer;
+}
+```
+
+**Decorator Pattern** — Add behavior to objects dynamically.
+```js
+function readonly(target, key, descriptor) {
+  descriptor.writable = false;
+  return descriptor;
+}
+
+function log(fn) {
+  return function(...args) {
+    console.log(`Calling ${fn.name} with`, args);
+    const result = fn(...args);
+    console.log(`Result:`, result);
+    return result;
+  };
+}
+
+const loggedAdd = log(add);
+loggedAdd(2, 3); // Logs args and result
+```
+
+---
+
+### Q162. What is the Module Pattern in JavaScript?
+
+**Answer:**
+The Module Pattern uses closures to create private state — important before ES modules.
+
+```js
+// IIFE Module pattern
+const Counter = (function() {
+  let _count = 0;    // Private
+
+  return {
+    increment() { _count++; },
+    decrement() { _count--; },
+    getCount()  { return _count; },
+    reset()     { _count = 0; }
+  };
+})();
+
+Counter.increment();
+Counter.increment();
+Counter.getCount(); // 2
+Counter._count;     // undefined — private!
+
+// Revealing Module pattern
+const UserStore = (function() {
+  let users = [];
+  
+  function addUser(user)     { users.push(user); }
+  function removeUser(id)    { users = users.filter(u => u.id !== id); }
+  function getAll()          { return [...users]; } // Return copy!
+  function findById(id)      { return users.find(u => u.id === id); }
+  
+  // Reveal only what should be public
+  return { add: addUser, remove: removeUser, getAll, findById };
+})();
+```
+
+---
+
+### Q163. What is the difference between `Object.assign()` and spread operator for merging?
+
+**Answer:**
+```js
+const defaults = { theme: 'light', lang: 'en', fontSize: 14 };
+const userPrefs = { theme: 'dark', notifications: true };
+
+// Object.assign — mutates the TARGET object
+const merged1 = Object.assign({}, defaults, userPrefs);
+// { theme: 'dark', lang: 'en', fontSize: 14, notifications: true }
+
+// Object.assign MODIFIES first argument!
+Object.assign(defaults, userPrefs);  // ⚠️ defaults is now mutated
+
+// Spread — always creates new object (no mutation)
+const merged2 = { ...defaults, ...userPrefs };
+// Same result, but defaults is untouched
+
+// Key difference: Object.assign triggers setters on target
+const obj = {
+  set value(v) { this._v = v * 2; }
+};
+Object.assign(obj, { value: 5 }); // Triggers setter → _v = 10
+const spread = { ...obj, value: 5 }; // Copies directly → value: 5, no setter
+
+// Both are SHALLOW — nested objects are still references
+const deep = { a: { b: 1 } };
+const copy = { ...deep };
+copy.a.b = 999;
+console.log(deep.a.b); // 999 — still linked!
+```
+
+---
+
+### Q164. What is `typeof` vs `instanceof` vs `Array.isArray()`?
+
+**Answer:**
+```js
+// typeof — returns string, works for primitives
+typeof 42;          // "number"
+typeof "hello";     // "string"
+typeof true;        // "boolean"
+typeof undefined;   // "undefined"
+typeof Symbol();    // "symbol"
+typeof 42n;         // "bigint"
+typeof function(){}; // "function"
+typeof {};          // "object"
+typeof [];          // "object"  ← can't distinguish
+typeof null;        // "object"  ← famous bug
+
+// instanceof — checks prototype chain, works for objects
+[] instanceof Array;       // true
+[] instanceof Object;      // true (Array extends Object)
+{} instanceof Object;      // true
+new Date() instanceof Date; // true
+
+// ⚠️ instanceof fails across iframes/realms
+// The Array from another iframe is a different Array constructor
+
+// Array.isArray() — reliable, works across realms
+Array.isArray([]);          // true
+Array.isArray({});          // false
+Array.isArray('string');    // false
+Array.isArray(new Array()); // true
+
+// Object.prototype.toString — most reliable type check
+Object.prototype.toString.call([]);         // "[object Array]"
+Object.prototype.toString.call(null);       // "[object Null]"
+Object.prototype.toString.call(undefined);  // "[object Undefined]"
+Object.prototype.toString.call(new Date()); // "[object Date]"
+Object.prototype.toString.call(/regex/);    // "[object RegExp]"
+```
+
+---
+
+### Q165. What are the different ways to create objects in JavaScript?
+
+**Answer:**
+```js
+// 1. Object literal
+const obj1 = { name: 'Alice', age: 30 };
+
+// 2. Constructor function
+function Person(name) { this.name = name; }
+const obj2 = new Person('Bob');
+
+// 3. ES6 Class
+class User { constructor(name) { this.name = name; } }
+const obj3 = new User('Charlie');
+
+// 4. Object.create() — set prototype explicitly
+const proto = { greet() { return `Hi ${this.name}`; } };
+const obj4 = Object.create(proto);
+obj4.name = 'Dave';
+
+// 5. Factory function — no 'new' needed
+function createAnimal(name, sound) {
+  return { name, sound, speak() { return `${this.name}: ${this.sound}`; } };
+}
+const obj5 = createAnimal('Cat', 'Meow');
+
+// 6. Object.assign()
+const obj6 = Object.assign({}, { a: 1 }, { b: 2 });
+
+// 7. Computed property names (ES6)
+const key = 'dynamicKey';
+const obj7 = { [key]: 'value', [`prefix_${key}`]: 'prefixed' };
+
+// 8. Shorthand property names (ES6)
+const name = 'Alice';
+const age = 30;
+const obj8 = { name, age }; // Same as { name: name, age: age }
+```
+
+---
+
+### Q166. What is `structuredClone()`? When was it introduced?
+
+**Answer:**
+`structuredClone()` was introduced natively in browsers and Node.js 17+ as the standard way to deep clone objects.
+
+```js
+// ✅ structuredClone — deep clone, handles most types
+const original = {
+  name: 'Alice',
+  scores: [95, 87, 92],
+  metadata: { created: new Date(), tags: ['react', 'js'] }
+};
+
+const clone = structuredClone(original);
+clone.scores.push(100);
+clone.metadata.tags.push('ts');
+
+console.log(original.scores);        // [95, 87, 92] — untouched
+console.log(original.metadata.tags); // ['react', 'js'] — untouched
+
+// Supported types: Date, RegExp, Map, Set, ArrayBuffer, typed arrays, Error
+const map = new Map([['a', 1]]);
+const mapClone = structuredClone(map); // ✅ Works!
+
+// ❌ Does NOT support: functions, DOM nodes, WeakMap, class instances (loses methods)
+const fn = () => {};
+structuredClone(fn); // ❌ DataCloneError
+
+// vs JSON.parse(JSON.stringify())
+const jsonClone = JSON.parse(JSON.stringify(original));
+// ❌ Loses: undefined, functions, Date (becomes string), Map, Set, circular refs
+```
+
+---
+
+### Q167. What are JavaScript Typed Arrays? What is ArrayBuffer?
+
+**Answer:**
+Typed Arrays provide array-like access to raw binary data.
+
+```js
+// ArrayBuffer — raw binary data (fixed-size)
+const buffer = new ArrayBuffer(16); // 16 bytes
+
+// Views — typed access to the buffer
+const int32 = new Int32Array(buffer);   // 4 elements (4 bytes each)
+const uint8 = new Uint8Array(buffer);   // 16 elements (1 byte each)
+// Both point to the SAME underlying buffer!
+
+int32[0] = 42;
+console.log(uint8[0]); // 42 (low byte of 42)
+
+// Common Typed Arrays
+new Int8Array(length);    // 8-bit signed integer
+new Uint8Array(length);   // 8-bit unsigned integer
+new Int16Array(length);   // 16-bit signed
+new Int32Array(length);   // 32-bit signed
+new Float32Array(length); // 32-bit float
+new Float64Array(length); // 64-bit float (like JS numbers)
+
+// Use cases: WebGL, canvas pixel manipulation, Web Audio, binary protocols (WebSockets, File API)
+const canvas = document.getElementById('canvas');
+const ctx = canvas.getContext('2d');
+const imageData = ctx.getImageData(0, 0, width, height);
+const pixels = imageData.data; // Uint8ClampedArray — RGBA values
+```
+
+---
+
+### Q168. What is the `Reflect` API?
+
+**Answer:**
+`Reflect` provides methods for interceptable JS operations, mirroring the `Proxy` traps.
+
+```js
+// Reflect has the same methods as Proxy handler traps
+// Useful inside Proxy handlers to apply default behavior
+
+const handler = {
+  get(target, prop, receiver) {
+    console.log(`Accessing: ${prop}`);
+    return Reflect.get(target, prop, receiver); // Default get behavior
+  },
+  set(target, prop, value, receiver) {
+    console.log(`Setting: ${prop} = ${value}`);
+    return Reflect.set(target, prop, value, receiver); // Default set
+  },
+  deleteProperty(target, prop) {
+    console.log(`Deleting: ${prop}`);
+    return Reflect.deleteProperty(target, prop);
+  }
+};
+
+const obj = new Proxy({ a: 1 }, handler);
+obj.a;        // "Accessing: a"
+obj.b = 2;    // "Setting: b = 2"
+
+// Reflect.ownKeys — gets ALL own keys (string + Symbol)
+const sym = Symbol('id');
+const obj2 = { name: 'Alice', [sym]: 42 };
+Reflect.ownKeys(obj2); // ['name', Symbol(id)]
+
+// vs Object.keys — only enumerable string keys
+Object.keys(obj2);     // ['name']
+```
+
+---
+
+### Q169. What is `eval()`? Why should you avoid it?
+
+**Answer:**
+`eval()` executes a string as JavaScript code.
+
+```js
+eval('2 + 2'); // 4
+eval('const x = 10; x * 2'); // 20
+
+// ❌ Why to AVOID it:
+// 1. Security — executes arbitrary code (XSS vector)
+const userInput = 'alert("hacked!")';
+eval(userInput); // Executes attacker code!
+
+// 2. Performance — prevents JS engine optimizations
+// V8 can't optimize code that uses eval (can't determine scope at compile time)
+
+// 3. Debugging — hard to trace errors in eval'd code
+
+// 4. Strict mode restrictions
+'use strict';
+eval('var x = 1');
+console.log(typeof x); // undefined — eval has own scope in strict mode
+
+// ✅ Alternatives
+// Dynamic property access
+const key = 'name';
+obj[key];           // Instead of eval(`obj.${key}`)
+
+// JSON parsing
+JSON.parse('{"a":1}');   // Instead of eval('({"a":1})')
+
+// Function constructor (slightly less dangerous than eval)
+const fn = new Function('a', 'b', 'return a + b;');
+fn(2, 3); // 5
+```
+
+---
+
+### Q170. What are the different string methods in ES6+?
+
+**Answer:**
+```js
+const str = '  Hello, World!  ';
+
+// ─── ES5 classics ───
+str.length;                  // 17
+str.toUpperCase();           // '  HELLO, WORLD!  '
+str.toLowerCase();           // '  hello, world!  '
+str.trim();                  // 'Hello, World!'
+str.trimStart();             // 'Hello, World!  '
+str.trimEnd();               // '  Hello, World!'
+str.indexOf('World');        // 9
+str.includes('World');       // true
+str.split(', ');             // ['  Hello', 'World!  ']
+str.replace('World', 'JS'); // '  Hello, JS!  '
+str.slice(2, 7);             // 'Hello'
+str.substring(2, 7);         // 'Hello'
+str.charAt(2);               // 'H'
+str.charCodeAt(2);           // 72
+
+// ─── ES6+ additions ───
+'abc'.startsWith('ab');      // true
+'abc'.endsWith('bc');        // true
+'ha'.repeat(3);              // 'hahaha'
+'5'.padStart(4, '0');        // '0005'
+'5'.padEnd(4, '0');          // '5000'
+
+// ES2021
+'a::b::c'.replaceAll('::', '-'); // 'a-b-c'
+
+// ─── String and Array interplay ───
+'hello'.split('').reverse().join(''); // 'olleh'
+
+// ─── Template literal methods ───
+String.raw`Hello\nWorld`;  // 'Hello\\nWorld' — no escape processing
+
+// ─── at() — ES2022 ───
+'hello'.at(0);   // 'h'
+'hello'.at(-1);  // 'o' — last character (negative index!)
+```
+
+---
+
+### Q171. What are the key Array methods added in ES6+?
+
+**Answer:**
+```js
+const nums = [1, 2, 3, 4, 5];
+
+// ─── ES6 ───
+Array.from({ length: 3 }, (_, i) => i + 1); // [1, 2, 3]
+Array.of(1, 2, 3);                           // [1, 2, 3]
+
+nums.find(n => n > 3);        // 4 (first match)
+nums.findIndex(n => n > 3);   // 3 (index of first match)
+nums.includes(3);              // true
+nums.fill(0, 2, 4);            // [1, 2, 0, 0, 5] — fill from index 2 to 4
+[[1, 2], [3, 4]].flat();       // [1, 2, 3, 4]
+[[1, [2, 3]]].flat(Infinity);  // [1, 2, 3] — deep flatten
+[1, 2, 3].flatMap(x => [x, x * 2]); // [1, 2, 2, 4, 3, 6]
+
+// ─── ES2019 ───
+[1, [2, [3]]].flat();           // [1, 2, [3]] — default depth 1
+[1, [2, [3]]].flat(2);          // [1, 2, 3]
+
+// ─── ES2022 ───
+nums.at(0);     // 1
+nums.at(-1);    // 5 — last element (clean!)
+nums.at(-2);    // 4
+
+// ─── ES2023 ───
+nums.findLast(n => n < 4);      // 3 (searches from end)
+nums.findLastIndex(n => n < 4); // 2
+
+// toSorted, toReversed, toSpliced, with — NON-MUTATING versions
+const arr = [3, 1, 2];
+const sorted = arr.toSorted();  // [1, 2, 3] — arr unchanged
+const reversed = arr.toReversed(); // [2, 1, 3] — arr unchanged
+const updated = arr.with(1, 99);   // [3, 99, 2] — change index 1
+
+// ─── Iteration helpers ───
+nums.every(n => n > 0);  // true — all pass?
+nums.some(n => n > 4);   // true — any pass?
+nums.entries();          // Iterator of [index, value] pairs
+nums.keys();             // Iterator of indices
+nums.values();           // Iterator of values
+```
+
+---
+
+### Q172. What are the key Object methods in ES6+?
+
+**Answer:**
+```js
+const obj = { a: 1, b: 2, c: 3 };
+
+// ─── Iteration ───
+Object.keys(obj);     // ['a', 'b', 'c']
+Object.values(obj);   // [1, 2, 3]
+Object.entries(obj);  // [['a',1], ['b',2], ['c',3]]
+
+// ─── Creation ───
+Object.fromEntries([['a', 1], ['b', 2]]); // { a: 1, b: 2 }
+Object.fromEntries(new Map([['key', 'val']]));
+
+// Transform objects with entries
+const doubled = Object.fromEntries(
+  Object.entries(obj).map(([k, v]) => [k, v * 2])
+); // { a: 2, b: 4, c: 6 }
+
+// ─── Property descriptors ───
+Object.defineProperty(obj, 'id', {
+  value: 42,
+  writable: false,
+  enumerable: false,  // Won't appear in Object.keys
+  configurable: false // Can't be changed/deleted
+});
+
+Object.getOwnPropertyDescriptor(obj, 'a');
+// { value: 1, writable: true, enumerable: true, configurable: true }
+
+Object.getOwnPropertyNames(obj);   // All own string props (incl. non-enumerable)
+Object.getOwnPropertySymbols(obj); // Own symbol props
+
+// ─── Prototype ───
+Object.getPrototypeOf(obj);        // Object.prototype
+Object.setPrototypeOf(obj, proto); // Change prototype (avoid in hot paths)
+
+// ─── Checking ───
+Object.is(NaN, NaN);     // true (unlike ===)
+Object.is(0, -0);        // false (unlike ===)
+obj.hasOwnProperty('a'); // true
+Object.hasOwn(obj, 'a'); // true (ES2022 — preferred, avoids prototype issues)
+```
+
+---
+
+### Q173. What is the difference between `for...in`, `Object.keys()`, and `Object.getOwnPropertyNames()`?
+
+**Answer:**
+```js
+function Animal(name) { this.name = name; }
+Animal.prototype.speak = function() { return 'sound'; };
+
+const dog = new Animal('Rex');
+Object.defineProperty(dog, 'secret', { value: 'hidden', enumerable: false });
+
+// for...in — own + INHERITED enumerable properties
+for (const key in dog) console.log(key);
+// 'name', 'speak' ← includes inherited!
+
+// Object.keys() — own ENUMERABLE properties only
+Object.keys(dog);  // ['name'] — no secret (non-enum), no speak (inherited)
+
+// Object.getOwnPropertyNames() — ALL own properties (incl. non-enumerable)
+Object.getOwnPropertyNames(dog); // ['name', 'secret'] — no speak (inherited)
+
+// Reflect.ownKeys() — ALL own properties including Symbols
+const sym = Symbol('id');
+dog[sym] = 1;
+Reflect.ownKeys(dog); // ['name', 'secret', Symbol(id)]
+
+// In summary:
+// for...in:                    inherited + own + enumerable
+// Object.keys():               own + enumerable
+// Object.getOwnPropertyNames():own + enumerable + non-enumerable (no symbols)
+// Reflect.ownKeys():           own + all strings + all symbols
+```
+
+---
+
+### Q174. What are WeakRef and FinalizationRegistry?
+
+**Answer:**
+Introduced in ES2021, these give JS code a way to interact with the garbage collector.
+
+```js
+// WeakRef — holds a weak reference to an object (doesn't prevent GC)
+let user = { name: 'Alice', data: new Array(1000000) };
+const weakRef = new WeakRef(user);
+
+// Access the object (may have been GC'd)
+const obj = weakRef.deref();
+if (obj) {
+  console.log(obj.name); // 'Alice' (if not GC'd)
+} else {
+  console.log('Object was garbage collected');
+}
+
+// FinalizationRegistry — run callback when object is GC'd
+const registry = new FinalizationRegistry((name) => {
+  console.log(`${name} was garbage collected`);
+});
+
+let resource = { name: 'BigResource' };
+registry.register(resource, resource.name);
+
+resource = null; // Eligible for GC
+// Eventually: "BigResource was garbage collected"
+
+// ⚠️ Use with caution — GC timing is non-deterministic
+// Primary use: cleanup of external resources (file handles, native objects)
+```
+
+---
+
+### Q175. What is the difference between shallow equality and deep equality?
+
+**Answer:**
+```js
+// Shallow equality — compares references for objects
+const a = { x: 1 };
+const b = { x: 1 };
+const c = a;
+
+a === b; // false — different references
+a === c; // true — same reference
+
+// Shallow equality check (what React uses for re-render checks)
+function shallowEqual(obj1, obj2) {
+  if (obj1 === obj2) return true;
+  const keys1 = Object.keys(obj1);
+  const keys2 = Object.keys(obj2);
+  if (keys1.length !== keys2.length) return false;
+  return keys1.every(key => obj1[key] === obj2[key]);
+}
+shallowEqual({ x: 1, y: 2 }, { x: 1, y: 2 }); // true
+shallowEqual({ x: { z: 1 } }, { x: { z: 1 } }); // false! nested ref differs
+
+// Deep equality — recursively compares all nested values
+function deepEqual(a, b) {
+  if (a === b) return true;
+  if (typeof a !== typeof b) return false;
+  if (typeof a !== 'object' || a === null) return false;
+  const keysA = Object.keys(a);
+  const keysB = Object.keys(b);
+  if (keysA.length !== keysB.length) return false;
+  return keysA.every(key => deepEqual(a[key], b[key]));
+}
+deepEqual({ x: { z: 1 } }, { x: { z: 1 } }); // true
+```
+
+---
+
+### Q176. What is coercion in JavaScript? Show examples of implicit vs explicit.
+
+**Answer:**
+Type coercion is the automatic or explicit conversion of values from one type to another.
+
+```js
+// ─── IMPLICIT COERCION (automatic) ───
+
+// String + anything = string concatenation
+'5' + 3;          // '53' (3 coerced to string)
+'5' + true;       // '5true'
+
+// Math operators coerce to number
+'5' - 3;          // 2 (string '5' → number 5)
+'5' * '3';        // 15
+true + 1;         // 2 (true → 1)
+false + 1;        // 1 (false → 0)
+null + 1;         // 1 (null → 0)
+undefined + 1;    // NaN (undefined → NaN)
+
+// Comparison coercion
+0 == false;       // true (false → 0)
+'' == false;      // true (both → 0)
+null == undefined; // true (special rule)
+NaN == NaN;       // false (NaN never equals anything)
+
+// Boolean context (truthy/falsy)
+// Falsy: false, 0, '', null, undefined, NaN, 0n
+// Everything else is truthy
+Boolean(0);    // false
+Boolean('');   // false
+Boolean([]);   // true ← empty array is truthy!
+Boolean({});   // true ← empty object is truthy!
+
+// ─── EXPLICIT COERCION ───
+Number('42');     // 42
+Number('');       // 0
+Number(null);     // 0
+Number(undefined); // NaN
+Number(true);     // 1
+
+String(42);       // '42'
+String(null);     // 'null'
+String(undefined); // 'undefined'
+
+Boolean(1);       // true
+Boolean(0);       // false
+
+parseInt('42px', 10); // 42
+parseFloat('3.14em'); // 3.14
+```
+
+---
+
+### Q177. What is `NaN`? How do you reliably check for it?
+
+**Answer:**
+`NaN` (Not a Number) is a numeric value representing an invalid number.
+
+```js
+// NaN is produced by invalid numeric operations
+parseInt('abc');      // NaN
+0 / 0;                // NaN
+Math.sqrt(-1);        // NaN
+undefined + 1;        // NaN
+Number('abc');        // NaN
+
+// NaN is the ONLY value not equal to itself
+NaN === NaN;          // false — bizarre!
+NaN == NaN;           // false
+
+// Checking for NaN
+isNaN('abc');         // true — ⚠️ coerces to number first! isNaN('abc') → isNaN(NaN) → true
+isNaN('123');         // false (coerces to 123)
+isNaN(undefined);     // true (undefined → NaN)
+
+Number.isNaN('abc');  // false — ✅ DOES NOT coerce! Only true for actual NaN
+Number.isNaN(NaN);    // true  ← most reliable
+Number.isNaN(undefined); // false
+
+// typeof NaN is 'number'
+typeof NaN;  // 'number' — yes, really
+
+// Pattern to filter NaN from arrays
+const arr = [1, NaN, 2, NaN, 3];
+arr.filter(n => !Number.isNaN(n)); // [1, 2, 3]
+```
+
+---
+
+### Q178. What are JavaScript Bitwise Operators and when are they used?
+
+**Answer:**
+```js
+// Bitwise operators work on 32-bit integers
+5 & 3;   // 1   (AND:  0101 & 0011 = 0001)
+5 | 3;   // 7   (OR:   0101 | 0011 = 0111)
+5 ^ 3;   // 6   (XOR:  0101 ^ 0011 = 0110)
+~5;      // -6  (NOT:  inverts all bits, ~n = -(n+1))
+5 << 1;  // 10  (Left shift: multiply by 2)
+5 >> 1;  // 2   (Right shift: divide by 2, sign-preserving)
+5 >>> 1; // 2   (Unsigned right shift: zero-fill)
+
+// ─── PRACTICAL USES ───
+
+// 1. Fast integer conversion (truncate decimal)
+~~3.7;     // 3  (double NOT)
+3.7 | 0;   // 3  (OR with 0)
+// Faster than Math.floor for positive numbers
+
+// 2. Check if number is odd/even
+n & 1;     // 1 = odd, 0 = even
+5 & 1;     // 1 → odd
+4 & 1;     // 0 → even
+
+// 3. Feature flags / permission bitmasks
+const READ    = 0b001; // 1
+const WRITE   = 0b010; // 2
+const EXECUTE = 0b100; // 4
+
+let permissions = READ | WRITE;  // 3 (has read and write)
+permissions & READ;    // 1 (non-zero = has read ✅)
+permissions & EXECUTE; // 0 (zero = no execute ❌)
+
+// Grant permission
+permissions |= EXECUTE;
+
+// Revoke permission
+permissions &= ~WRITE;
+```
 
 ---
 
